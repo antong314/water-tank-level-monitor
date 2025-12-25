@@ -1,16 +1,12 @@
-"""Email sender for sending reports via SMTP."""
+"""Email sender using Resend API."""
 
-import smtplib
-import ssl
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 import logging
+from typing import Optional
+
+import resend
 
 from .config import (
-    SMTP_HOST,
-    SMTP_PORT,
-    SMTP_USER,
-    SMTP_PASSWORD,
+    RESEND_API_KEY,
     EMAIL_FROM,
     EMAIL_TO,
     validate_email_config,
@@ -27,11 +23,11 @@ class EmailSendError(Exception):
 def send_email(
     subject: str,
     html_content: str,
-    text_content: str | None = None,
-    to_addresses: list[str] | None = None,
-    from_address: str | None = None,
+    text_content: Optional[str] = None,
+    to_addresses: Optional[list[str]] = None,
+    from_address: Optional[str] = None,
 ) -> bool:
-    """Send an email via SMTP.
+    """Send an email via Resend API.
     
     Args:
         subject: Email subject line
@@ -61,54 +57,35 @@ def send_email(
     if config_errors:
         raise EmailSendError(f"Email configuration errors: {', '.join(config_errors)}")
     
-    # Create message
-    message = MIMEMultipart("alternative")
-    message["Subject"] = subject
-    message["From"] = from_address
-    message["To"] = ", ".join(to_addresses)
-    
-    # Add plain text part
-    if text_content:
-        text_part = MIMEText(text_content, "plain")
-        message.attach(text_part)
-    
-    # Add HTML part
-    html_part = MIMEText(html_content, "html")
-    message.attach(html_part)
+    # Set Resend API key
+    resend.api_key = RESEND_API_KEY
     
     try:
-        # Create secure SSL context
-        context = ssl.create_default_context()
+        # Build email payload
+        email_params = {
+            "from": from_address,
+            "to": to_addresses,
+            "subject": subject,
+            "html": html_content,
+        }
         
-        # Connect to SMTP server
-        if SMTP_PORT == 465:
-            # SSL connection
-            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=context) as server:
-                server.login(SMTP_USER, SMTP_PASSWORD)
-                server.sendmail(from_address, to_addresses, message.as_string())
-        else:
-            # STARTTLS connection
-            with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-                server.starttls(context=context)
-                server.login(SMTP_USER, SMTP_PASSWORD)
-                server.sendmail(from_address, to_addresses, message.as_string())
+        if text_content:
+            email_params["text"] = text_content
         
-        logger.info(f"Email sent successfully to {', '.join(to_addresses)}")
+        # Send via Resend
+        response = resend.Emails.send(email_params)
+        
+        email_id = response.get("id", "unknown") if isinstance(response, dict) else getattr(response, "id", "unknown")
+        logger.info(f"Email sent successfully (ID: {email_id}) to {', '.join(to_addresses)}")
         return True
         
-    except smtplib.SMTPAuthenticationError as e:
-        raise EmailSendError(f"SMTP authentication failed: {e}")
-    except smtplib.SMTPRecipientsRefused as e:
-        raise EmailSendError(f"Recipients refused: {e}")
-    except smtplib.SMTPException as e:
-        raise EmailSendError(f"SMTP error: {e}")
     except Exception as e:
         raise EmailSendError(f"Failed to send email: {e}")
 
 
 def send_daily_report(
     html_content: str,
-    text_content: str | None = None,
+    text_content: Optional[str] = None,
     report_date: str = "",
 ) -> bool:
     """Send the daily water tank report.
@@ -128,4 +105,3 @@ def send_daily_report(
         html_content=html_content,
         text_content=text_content,
     )
-

@@ -25,12 +25,9 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
 
 
 # =============================================================================
-# Email Configuration
+# Email Configuration (using Resend)
 # =============================================================================
-SMTP_HOST = os.getenv("SMTP_HOST", "")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER = os.getenv("SMTP_USER", "")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 EMAIL_FROM = os.getenv("EMAIL_FROM", "")
 EMAIL_TO = os.getenv("EMAIL_TO", "").split(",")
 
@@ -115,12 +112,8 @@ def validate_email_config() -> list[str]:
     """
     errors = []
     
-    if not SMTP_HOST:
-        errors.append("SMTP_HOST is required for email")
-    if not SMTP_USER:
-        errors.append("SMTP_USER is required for email")
-    if not SMTP_PASSWORD:
-        errors.append("SMTP_PASSWORD is required for email")
+    if not RESEND_API_KEY:
+        errors.append("RESEND_API_KEY is required for email")
     if not EMAIL_FROM:
         errors.append("EMAIL_FROM is required for email")
     if not EMAIL_TO or not EMAIL_TO[0]:
