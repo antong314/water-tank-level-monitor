@@ -15,15 +15,16 @@ from datetime import datetime, timedelta
 from urllib.parse import urlparse, parse_qsl, urlencode
 
 # =============================================================================
-# YOUR CREDENTIALS
+# YOUR CREDENTIALS - Load from environment or set here for testing
 # =============================================================================
-CLIENT_ID = "y9gskj4ra8puc8pdu3dc"
-CLIENT_SECRET = "edf2efcce8984bd5b7482aa40a0ecfc6"
-BASE_URL = "https://openapi.tuyaus.com"
+import os
+CLIENT_ID = os.getenv("TUYA_CLIENT_ID", "your_client_id")
+CLIENT_SECRET = os.getenv("TUYA_CLIENT_SECRET", "your_client_secret")
+BASE_URL = os.getenv("TUYA_BASE_URL", "https://openapi.tuyaus.com")
 
 # Your specific device and user
-DEVICE_ID = "eb3c06f2af31ffe41cyyvo"
-USER_ID = "54T00B6U"
+DEVICE_ID = os.getenv("TUYA_DEVICE_ID", "your_device_id")
+USER_ID = os.getenv("TUYA_USER_ID", "your_user_id")
 
 # =============================================================================
 # API Helper Class - Fixed Signature
