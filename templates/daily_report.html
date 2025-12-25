@@ -61,24 +61,28 @@
             padding-bottom: 8px;
             border-bottom: 2px solid #e2e8f0;
         }
-        .metric {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .metric-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .metric-row td {
             padding: 14px 0;
             border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
         }
-        .metric:last-child {
+        .metric-row:last-child td {
             border-bottom: none;
         }
         .metric-label {
             color: #475569;
             font-size: 15px;
+            text-align: left;
         }
         .metric-value {
             font-weight: 600;
             color: #1e293b;
             font-size: 15px;
+            text-align: right;
         }
         .metric-value.highlight {
             color: #0ea5e9;
@@ -105,18 +109,6 @@
             height: 100%;
             background: linear-gradient(90deg, #0ea5e9 0%, #06b6d4 50%, #22d3ee 100%);
             border-radius: 14px;
-            transition: width 0.5s ease;
-            position: relative;
-        }
-        .level-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 50%;
-            background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
-            border-radius: 14px 14px 0 0;
         }
         .level-text {
             text-align: center;
@@ -153,10 +145,6 @@
             color: #64748b;
             font-size: 13px;
             border-top: 1px solid #e2e8f0;
-        }
-        .footer a {
-            color: #0ea5e9;
-            text-decoration: none;
         }
         .status-badge {
             display: inline-block;
@@ -218,63 +206,73 @@
             <!-- Daily Range -->
             <div class="section">
                 <div class="section-title">📊 Daily Range</div>
-                <div class="metric">
-                    <span class="metric-label">Minimum Level</span>
-                    <span class="metric-value">{{ min_depth }} units ({{ min_liters }}L)</span>
-                </div>
-                <div class="metric">
-                    <span class="metric-label">Maximum Level</span>
-                    <span class="metric-value">{{ max_depth }} units ({{ max_liters }}L)</span>
-                </div>
+                <table class="metric-table">
+                    <tr class="metric-row">
+                        <td class="metric-label">Minimum Level</td>
+                        <td class="metric-value">{{ min_depth }} units ({{ min_liters }}L)</td>
+                    </tr>
+                    <tr class="metric-row">
+                        <td class="metric-label">Maximum Level</td>
+                        <td class="metric-value">{{ max_depth }} units ({{ max_liters }}L)</td>
+                    </tr>
+                </table>
             </div>
             
             <!-- Spring Intake -->
             <div class="section">
                 <div class="section-title">🌊 Spring Intake</div>
-                <div class="metric">
-                    <span class="metric-label">Fill Rate (overnight)</span>
-                    <span class="metric-value">{{ fill_rate }} units/hr ({{ fill_rate_liters }}L/hr)</span>
-                </div>
-                <div class="metric">
-                    <span class="metric-label">Est. 24hr Intake</span>
-                    <span class="metric-value highlight">{{ daily_intake_liters }}L</span>
-                </div>
-                {% if night_duration_hours > 0 %}
-                <div class="metric">
-                    <span class="metric-label">Night Analysis</span>
-                    <span class="metric-value">{{ night_duration_hours }}hrs, R²={{ r_squared }}</span>
-                </div>
-                {% endif %}
+                <table class="metric-table">
+                    <tr class="metric-row">
+                        <td class="metric-label">Fill Rate (overnight)</td>
+                        <td class="metric-value">{{ fill_rate }} units/hr ({{ fill_rate_liters }}L/hr)</td>
+                    </tr>
+                    <tr class="metric-row">
+                        <td class="metric-label">Est. 24hr Intake</td>
+                        <td class="metric-value highlight">{{ daily_intake_liters }}L</td>
+                    </tr>
+                    {% if night_duration_hours > 0 %}
+                    <tr class="metric-row">
+                        <td class="metric-label">Night Analysis</td>
+                        <td class="metric-value">{{ night_duration_hours }}hrs, R²={{ r_squared }}</td>
+                    </tr>
+                    {% endif %}
+                </table>
             </div>
             
             <!-- Water Usage -->
             <div class="section">
                 <div class="section-title">🚿 Water Usage</div>
-                <div class="metric">
-                    <span class="metric-label">Estimated Usage</span>
-                    <span class="metric-value highlight">{{ usage_liters }}L</span>
-                </div>
-                <div class="metric">
-                    <span class="metric-label">Net Change</span>
-                    <span class="metric-value {% if net_change > 0 %}positive{% elif net_change < 0 %}negative{% endif %}">
-                        {% if net_change > 0 %}+{% endif %}{{ net_change }} units
-                    </span>
-                </div>
+                <table class="metric-table">
+                    <tr class="metric-row">
+                        <td class="metric-label">Estimated Usage</td>
+                        <td class="metric-value highlight">{{ usage_liters }}L</td>
+                    </tr>
+                    <tr class="metric-row">
+                        <td class="metric-label">Net Change</td>
+                        <td class="metric-value {% if net_change > 0 %}positive{% elif net_change < 0 %}negative{% endif %}">
+                            {% if net_change > 0 %}+{% endif %}{{ net_change }} units
+                        </td>
+                    </tr>
+                </table>
             </div>
             
             <!-- Device Status -->
             <div class="section">
                 <div class="section-title">📡 Sensor Status</div>
-                <div class="metric">
-                    <span class="metric-label">Device Status</span>
-                    <span class="status-badge {% if device_online %}status-online{% else %}status-offline{% endif %}">
-                        {% if device_online %}● Online{% else %}● Offline{% endif %}
-                    </span>
-                </div>
-                <div class="metric">
-                    <span class="metric-label">Readings Today</span>
-                    <span class="metric-value">{{ readings_count }}</span>
-                </div>
+                <table class="metric-table">
+                    <tr class="metric-row">
+                        <td class="metric-label">Device Status</td>
+                        <td class="metric-value">
+                            <span class="status-badge {% if device_online %}status-online{% else %}status-offline{% endif %}">
+                                {% if device_online %}● Online{% else %}● Offline{% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr class="metric-row">
+                        <td class="metric-label">Readings Today</td>
+                        <td class="metric-value">{{ readings_count }}</td>
+                    </tr>
+                </table>
             </div>
         </div>
         
@@ -284,4 +282,3 @@
     </div>
 </body>
 </html>
-
