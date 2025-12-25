@@ -1,0 +1,5 @@
+metric,value
+fill_rate_depth_units_per_hour,10.5105
+r_squared,0.9911
+predicted_start_depth,40.77
+predicted_end_depth,75.14
