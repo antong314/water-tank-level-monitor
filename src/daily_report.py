@@ -54,18 +54,29 @@ def run_daily_report(report_date: datetime | None = None) -> dict:
     supabase = SupabaseClient()
     tz = pytz.timezone(TIMEZONE)
     
-    # Determine report date (default to yesterday in local timezone)
+    # Determine report period (last 24 hours ending now)
+    now_utc = datetime.now(pytz.UTC)
+    now_local = now_utc.astimezone(tz)
+    
     if report_date is None:
-        now_local = datetime.now(tz)
-        report_date = now_local - timedelta(days=1)
+        # Use current time as end, 24 hours ago as start
+        end_time = now_utc
+        start_time = now_utc - timedelta(hours=24)
+        report_date = now_local
+    else:
+        # If specific date provided, use that day's range
+        local_date = tz.localize(datetime(report_date.year, report_date.month, report_date.day))
+        start_time = local_date.astimezone(pytz.UTC)
+        end_time = (local_date + timedelta(days=1)).astimezone(pytz.UTC)
     
     report_date_str = report_date.strftime("%Y-%m-%d")
     logger.info(f"Generating report for: {report_date_str}")
+    logger.info(f"Time range: {start_time.astimezone(tz).strftime('%Y-%m-%d %H:%M')} to {end_time.astimezone(tz).strftime('%Y-%m-%d %H:%M')} ({TIMEZONE})")
     
     try:
-        # Fetch readings for the report date
+        # Fetch readings for the last 24 hours
         logger.info("Fetching readings from Supabase...")
-        readings = supabase.get_readings_for_date(report_date)
+        readings = supabase.get_readings_range(start_time, end_time)
         logger.info(f"Found {len(readings)} readings")
         
         if not readings:
